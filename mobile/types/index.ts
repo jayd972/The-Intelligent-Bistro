@@ -2,7 +2,7 @@
 
 export type MenuCategory = "mains" | "sides" | "drinks" | "desserts";
 
-export type MenuItemSize = "small" | "medium" | "large";
+type MenuItemSize = "small" | "medium" | "large";
 
 export interface MenuItem {
   id: string;
@@ -35,7 +35,7 @@ export interface AssistantRequest {
   cartItems?: CartItem[];
 }
 
-export type ActionType = "add_item" | "remove_item" | "update_quantity" | "clear_cart";
+type ActionType = "add_item" | "remove_item" | "update_quantity" | "clear_cart";
 
 export interface CartAction {
   type: ActionType;

@@ -14,7 +14,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useRouter } from "expo-router";
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import { MenuItem, MenuCategory } from "@/types";
-import { fetchMenu } from "@/services/api";
+import { fetchMenu, checkHealth } from "@/services/api";
 import { useCart } from "@/context/CartContext";
 import MenuCard from "@/components/MenuCard";
 import CategoryFilter from "@/components/CategoryFilter";
@@ -30,6 +30,7 @@ export default function MenuScreen() {
   const [error, setError] = useState<string | null>(null);
   const [category, setCategory] = useState<MenuCategory | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [serverStatus, setServerStatus] = useState<"online" | "offline" | "connecting">("connecting");
   const [toast, setToast] = useState<string | null>(null);
   const toastOpacity = useRef(new Animated.Value(0)).current;
   const toastTranslate = useRef(new Animated.Value(20)).current;
@@ -74,6 +75,15 @@ export default function MenuScreen() {
     try {
       if (showLoader) setLoading(true);
       setError(null);
+      
+      // Ping health check first
+      try {
+        const health = await checkHealth();
+        setServerStatus(health.status === "ok" ? "online" : "offline");
+      } catch (err) {
+        setServerStatus("offline");
+      }
+
       const data = await fetchMenu();
       setItems(data.items);
     } catch (err) {
@@ -159,7 +169,9 @@ export default function MenuScreen() {
                 <Text style={styles.headerTitle}>
                   Intelligent Bistro
                 </Text>
-                <Text style={styles.headerSubtitle}>Your smart restaurant assistant</Text>
+                <Text style={styles.headerSubtitle}>
+                  Your smart restaurant assistant • {serverStatus === "online" ? "Online" : "Offline"}
+                </Text>
               </View>
             </View>
 
