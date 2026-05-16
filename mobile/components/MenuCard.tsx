@@ -1,12 +1,12 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useState, useRef } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from "react-native";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { MenuItem } from "@/types";
 import {
   Colors,
   Spacing,
   BorderRadius,
   Typography,
-  Shadows,
 } from "@/constants/theme";
 
 const itemEmojis: Record<string, string> = {
@@ -38,83 +38,105 @@ interface MenuCardProps {
 export default function MenuCard({ item, onAddToCart }: MenuCardProps) {
   const emoji = itemEmojis[item.image] || "🍽️";
   const [added, setAdded] = useState(false);
+  const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const handleAdd = () => {
     onAddToCart(item);
     setAdded(true);
+
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 0.97,
+        duration: 60,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        useNativeDriver: true,
+        tension: 200,
+        friction: 10,
+      }),
+    ]).start();
+
     setTimeout(() => setAdded(false), 1200);
   };
 
   return (
-    <View style={styles.card}>
-      <View style={styles.emojiContainer}>
-        <Text style={styles.emoji}>{emoji}</Text>
-      </View>
+    <Animated.View style={[styles.card, { transform: [{ scale: scaleAnim }] }]}>
+      <TouchableOpacity
+        style={styles.cardInner}
+        onPress={handleAdd}
+        activeOpacity={0.7}
+      >
+        <View style={styles.textSection}>
+          <View style={styles.nameRow}>
+            <Text style={styles.name} numberOfLines={1}>
+              {item.name}
+            </Text>
+            {item.popular && (
+              <View style={styles.popularBadge}>
+                <FontAwesome name="star" size={8} color="#B8860B" />
+              </View>
+            )}
+          </View>
 
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.name} numberOfLines={1}>
-            {item.name}
+          <Text style={styles.description} numberOfLines={2}>
+            {item.description}
           </Text>
-          {item.popular && (
-            <View style={styles.popularBadge}>
-              <Text style={styles.popularText}>Popular</Text>
-            </View>
-          )}
+
+          <View style={styles.metaRow}>
+            <Text style={styles.price}>${item.price.toFixed(2)}</Text>
+            {item.availableModifiers && item.availableModifiers.length > 0 && (
+              <>
+                <View style={styles.metaDot} />
+                <Text style={styles.metaText}>Customizable</Text>
+              </>
+            )}
+          </View>
         </View>
 
-        <Text style={styles.description} numberOfLines={2}>
-          {item.description}
-        </Text>
-
-        <View style={styles.footer}>
-          <Text style={styles.price}>${item.price.toFixed(2)}</Text>
+        <View style={styles.imageSection}>
+          <View style={styles.emojiWrap}>
+            <Text style={styles.emoji}>{emoji}</Text>
+          </View>
           <TouchableOpacity
-            style={[styles.addButton, added && styles.addedButton]}
+            style={[styles.addBtn, added && styles.addBtnActive]}
             onPress={handleAdd}
-            activeOpacity={0.7}
+            activeOpacity={0.8}
           >
-            <Text style={styles.addButtonText}>
-              {added ? "✓ Added" : "+ Add"}
-            </Text>
+            {added ? (
+              <FontAwesome name="check" size={12} color={Colors.textLight} />
+            ) : (
+              <FontAwesome name="plus" size={12} color={Colors.textLight} />
+            )}
           </TouchableOpacity>
         </View>
-      </View>
-    </View>
+      </TouchableOpacity>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
     backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.lg,
-    marginHorizontal: Spacing.md,
-    marginBottom: Spacing.md,
-    padding: Spacing.md,
-    ...Shadows.small,
   },
-  emojiContainer: {
-    width: 72,
-    height: 72,
-    borderRadius: BorderRadius.md,
-    backgroundColor: Colors.surfaceAlt,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: Spacing.md,
+  cardInner: {
+    flexDirection: "row",
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
+    gap: Spacing.md,
   },
-  emoji: {
-    fontSize: 36,
-  },
-  content: {
+  textSection: {
     flex: 1,
-    justifyContent: "space-between",
+    justifyContent: "center",
   },
-  header: {
+  nameRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: Spacing.sm,
-    marginBottom: 2,
+    gap: Spacing.xs + 2,
+    marginBottom: 3,
   },
   name: {
     ...Typography.h3,
@@ -122,43 +144,68 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   popularBadge: {
-    backgroundColor: Colors.accent,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 2,
-    borderRadius: BorderRadius.full,
-  },
-  popularText: {
-    ...Typography.caption,
-    fontWeight: "700",
-    color: Colors.secondary,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: Colors.accentSoft,
+    alignItems: "center",
+    justifyContent: "center",
   },
   description: {
     ...Typography.bodySmall,
     color: Colors.textSecondary,
-    lineHeight: 20,
+    lineHeight: 18,
     marginBottom: Spacing.sm,
   },
-  footer: {
+  metaRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
   },
   price: {
     ...Typography.price,
-    color: Colors.primary,
+    color: Colors.text,
   },
-  addButton: {
+  metaDot: {
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: Colors.textTertiary,
+    marginHorizontal: Spacing.sm,
+  },
+  metaText: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
+  },
+  imageSection: {
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
+  emojiWrap: {
+    width: 96,
+    height: 96,
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.surfaceAlt,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emoji: {
+    fontSize: 44,
+  },
+  addBtn: {
+    position: "absolute",
+    bottom: -6,
+    right: -6,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     backgroundColor: Colors.primary,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.sm,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: Colors.surface,
   },
-  addedButton: {
+  addBtnActive: {
     backgroundColor: Colors.success,
-  },
-  addButtonText: {
-    ...Typography.button,
-    color: Colors.textLight,
-    fontSize: 14,
   },
 });

@@ -7,7 +7,6 @@ import {
   Spacing,
   BorderRadius,
   Typography,
-  Shadows,
 } from "@/constants/theme";
 import QuantityStepper from "./QuantityStepper";
 
@@ -23,6 +22,7 @@ export default function CartItemCard({
   onRemove,
 }: CartItemCardProps) {
   const lineTotal = item.price * item.quantity;
+  const hasDetails = item.size || item.modifiers.length > 0;
 
   return (
     <View style={styles.card}>
@@ -31,22 +31,26 @@ export default function CartItemCard({
           <Text style={styles.name} numberOfLines={1}>
             {item.name}
           </Text>
-          {item.size && (
+          {hasDetails && (
             <Text style={styles.detail}>
-              Size: {item.size.charAt(0).toUpperCase() + item.size.slice(1)}
+              {[
+                item.size && (item.size.charAt(0).toUpperCase() + item.size.slice(1)),
+                ...item.modifiers,
+              ].filter(Boolean).join(" · ")}
             </Text>
           )}
-          {item.modifiers.length > 0 && (
-            <Text style={styles.detail}>{item.modifiers.join(", ")}</Text>
-          )}
+          <Text style={styles.unitPrice}>
+            ${item.price.toFixed(2)} each
+          </Text>
         </View>
 
         <TouchableOpacity
           onPress={() => onRemove(item.id)}
           style={styles.removeButton}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          activeOpacity={0.6}
         >
-          <FontAwesome name="trash-o" size={16} color={Colors.error} />
+          <FontAwesome name="trash-o" size={14} color={Colors.textTertiary} />
         </TouchableOpacity>
       </View>
 
@@ -56,13 +60,7 @@ export default function CartItemCard({
           onIncrement={() => onUpdateQuantity(item.id, item.quantity + 1)}
           onDecrement={() => onUpdateQuantity(item.id, item.quantity - 1)}
         />
-
-        <View style={styles.priceSection}>
-          <Text style={styles.unitPrice}>
-            ${item.price.toFixed(2)} each
-          </Text>
-          <Text style={styles.lineTotal}>${lineTotal.toFixed(2)}</Text>
-        </View>
+        <Text style={styles.lineTotal}>${lineTotal.toFixed(2)}</Text>
       </View>
     </View>
   );
@@ -71,17 +69,16 @@ export default function CartItemCard({
 const styles = StyleSheet.create({
   card: {
     backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.lg,
-    marginHorizontal: Spacing.md,
-    marginBottom: Spacing.md,
-    padding: Spacing.md,
-    ...Shadows.small,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
   },
   topRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.sm + 4,
   },
   nameSection: {
     flex: 1,
@@ -95,7 +92,11 @@ const styles = StyleSheet.create({
   detail: {
     ...Typography.caption,
     color: Colors.textSecondary,
-    marginTop: 2,
+    marginBottom: 2,
+  },
+  unitPrice: {
+    ...Typography.caption,
+    color: Colors.textTertiary,
   },
   removeButton: {
     padding: Spacing.xs,
@@ -105,16 +106,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  priceSection: {
-    alignItems: "flex-end",
-  },
-  unitPrice: {
-    ...Typography.caption,
-    color: Colors.textSecondary,
-    marginBottom: 2,
-  },
   lineTotal: {
     ...Typography.price,
-    color: Colors.primary,
+    color: Colors.text,
   },
 });

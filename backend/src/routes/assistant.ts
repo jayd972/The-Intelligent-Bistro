@@ -5,8 +5,6 @@ import { fallbackParse } from "../services/fallbackParser";
 
 const router = Router();
 
-const useAI = !!process.env.OPENAI_API_KEY;
-
 router.post("/", async (req, res) => {
   const { message } = req.body as AssistantRequest;
 
@@ -14,6 +12,8 @@ router.post("/", async (req, res) => {
     res.status(400).json({ error: "Message is required" });
     return;
   }
+
+  const useAI = !!process.env.OPENAI_API_KEY;
 
   try {
     const result = useAI
@@ -28,7 +28,6 @@ router.post("/", async (req, res) => {
   } catch (error) {
     console.error("Assistant error:", error);
 
-    // If AI fails, fall back to the keyword parser
     if (useAI) {
       console.log("AI parser failed, falling back to keyword parser");
       try {

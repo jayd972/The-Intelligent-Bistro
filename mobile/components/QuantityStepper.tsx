@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Colors, Spacing, BorderRadius, Typography } from "@/constants/theme";
 
 interface QuantityStepperProps {
@@ -20,7 +21,7 @@ export default function QuantityStepper({
         onPress={onDecrement}
         activeOpacity={0.6}
       >
-        <Text style={styles.buttonText}>−</Text>
+        <FontAwesome name="minus" size={12} color={Colors.primary} />
       </TouchableOpacity>
 
       <View style={styles.countContainer}>
@@ -32,7 +33,7 @@ export default function QuantityStepper({
         onPress={onIncrement}
         activeOpacity={0.6}
       >
-        <Text style={[styles.buttonText, styles.incrementText]}>+</Text>
+        <FontAwesome name="plus" size={12} color={Colors.textLight} />
       </TouchableOpacity>
     </View>
   );
@@ -42,9 +43,8 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: BorderRadius.sm,
-    borderWidth: 1.5,
-    borderColor: Colors.border,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.surfaceAlt,
     overflow: "hidden",
   },
   button: {
@@ -52,27 +52,19 @@ const styles = StyleSheet.create({
     height: 36,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: Colors.surfaceAlt,
   },
   incrementButton: {
     backgroundColor: Colors.primary,
-  },
-  buttonText: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: Colors.text,
-  },
-  incrementText: {
-    color: Colors.textLight,
+    borderRadius: 18,
   },
   countContainer: {
-    width: 40,
+    width: 32,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: Colors.surface,
   },
   count: {
     ...Typography.button,
+    fontWeight: "700",
     color: Colors.text,
   },
 });
