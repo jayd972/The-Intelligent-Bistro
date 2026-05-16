@@ -8,42 +8,66 @@ import {
   RefreshControl,
   Animated,
   TouchableOpacity,
+  TextInput,
 } from "react-native";
-import { Colors, Typography, Spacing, BorderRadius } from "@/constants/theme";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { useRouter } from "expo-router";
+import { Colors, Typography, Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import { MenuItem, MenuCategory } from "@/types";
 import { fetchMenu } from "@/services/api";
 import { useCart } from "@/context/CartContext";
 import MenuCard from "@/components/MenuCard";
 import CategoryFilter from "@/components/CategoryFilter";
 
+const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
 export default function MenuScreen() {
   const { addItem } = useCart();
+  const router = useRouter();
   const [items, setItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [category, setCategory] = useState<MenuCategory | "all">("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [toast, setToast] = useState<string | null>(null);
   const toastOpacity = useRef(new Animated.Value(0)).current;
+  const toastTranslate = useRef(new Animated.Value(20)).current;
 
   const showToast = useCallback(
     (message: string) => {
       setToast(message);
-      Animated.sequence([
+      toastTranslate.setValue(20);
+      Animated.parallel([
         Animated.timing(toastOpacity, {
           toValue: 1,
           duration: 200,
           useNativeDriver: true,
         }),
-        Animated.delay(1500),
-        Animated.timing(toastOpacity, {
+        Animated.spring(toastTranslate, {
           toValue: 0,
-          duration: 300,
           useNativeDriver: true,
+          tension: 120,
+          friction: 8,
         }),
-      ]).start(() => setToast(null));
+      ]).start(() => {
+        setTimeout(() => {
+          Animated.parallel([
+            Animated.timing(toastOpacity, {
+              toValue: 0,
+              duration: 300,
+              useNativeDriver: true,
+            }),
+            Animated.timing(toastTranslate, {
+              toValue: 20,
+              duration: 300,
+              useNativeDriver: true,
+            }),
+          ]).start(() => setToast(null));
+        }, 1800);
+      });
     },
-    [toastOpacity]
+    [toastOpacity, toastTranslate]
   );
 
   const loadMenu = useCallback(async (showLoader = true) => {
@@ -69,10 +93,20 @@ export default function MenuScreen() {
     loadMenu(false);
   }, [loadMenu]);
 
+  const searchFiltered = searchQuery.trim()
+    ? items.filter(
+        (item) =>
+          item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.description.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : items;
+
   const filteredItems =
     category === "all"
-      ? items
-      : items.filter((item) => item.category === category);
+      ? searchFiltered
+      : searchFiltered.filter((item) => item.category === category);
+
+  const popularItems = items.filter((item) => item.popular);
 
   const handleAddToCart = (item: MenuItem) => {
     addItem(item);
@@ -105,6 +139,8 @@ export default function MenuScreen() {
     );
   }
 
+  const dayName = DAYS[new Date().getDay()];
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -115,20 +151,80 @@ export default function MenuScreen() {
         )}
         ListHeaderComponent={
           <View>
-            <View style={styles.heroSection}>
-              <Text style={styles.heroTitle}>Intelligent Bistro</Text>
-              <Text style={styles.heroSubtitle}>
-                Fresh, crafted, delivered with care
-              </Text>
+            <View style={styles.header}>
+              <View>
+                <Text style={styles.greeting}>
+                  Happy {dayName}! 👋
+                </Text>
+                <Text style={styles.headerTitle}>
+                  Intelligent Bistro
+                </Text>
+                <Text style={styles.headerSubtitle}>AI-powered ordering</Text>
+              </View>
             </View>
+
+            <View style={styles.searchBar}>
+              <FontAwesome name="search" size={14} color={Colors.textTertiary} />
+              <TextInput
+                style={styles.searchInput}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholder="What are you craving?"
+                placeholderTextColor={Colors.textTertiary}
+                returnKeyType="search"
+                clearButtonMode="while-editing"
+              />
+              {searchQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setSearchQuery("")}>
+                  <FontAwesome name="times-circle" size={16} color={Colors.textTertiary} />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            <TouchableOpacity
+              style={styles.aiCard}
+              activeOpacity={0.8}
+              onPress={() => router.push("/assistant")}
+            >
+              <View style={styles.aiCardRow}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.aiCardTitle}>🤖 Order with AI</Text>
+                  <Text style={styles.aiCardSubtitle}>
+                    "Add two spicy chicken sandwiches and a lemonade"
+                  </Text>
+                </View>
+                <View style={styles.aiCardBtn}>
+                  <FontAwesome name="comment" size={11} color={Colors.textLight} />
+                  <Text style={styles.aiCardBtnText}>Ask AI</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+
             <CategoryFilter selected={category} onSelect={setCategory} />
+
+            {category === "all" && popularItems.length > 0 && (
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Chef's Favorites</Text>
+              </View>
+            )}
+            {category !== "all" && (
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>
+                  {category.charAt(0).toUpperCase() + category.slice(1)}
+                </Text>
+                <Text style={styles.sectionCount}>
+                  {filteredItems.length} item{filteredItems.length !== 1 ? "s" : ""}
+                </Text>
+              </View>
+            )}
           </View>
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyEmoji}>🔍</Text>
+            <Text style={styles.emptyTitle}>No items found</Text>
             <Text style={styles.emptyText}>
-              No items in this category yet.
+              Try selecting a different category
             </Text>
           </View>
         }
@@ -145,8 +241,19 @@ export default function MenuScreen() {
       />
 
       {toast && (
-        <Animated.View style={[styles.toast, { opacity: toastOpacity }]}>
-          <Text style={styles.toastText}>✓ {toast}</Text>
+        <Animated.View
+          style={[
+            styles.toast,
+            {
+              opacity: toastOpacity,
+              transform: [{ translateY: toastTranslate }],
+            },
+          ]}
+        >
+          <View style={styles.toastContent}>
+            <FontAwesome name="check-circle" size={16} color={Colors.success} />
+            <Text style={styles.toastText}>{toast}</Text>
+          </View>
         </Animated.View>
       )}
     </View>
@@ -159,20 +266,97 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   listContent: {
-    paddingBottom: Spacing.xl,
+    paddingBottom: Spacing.xxl + 20,
   },
-  heroSection: {
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.lg,
+  header: {
+    paddingHorizontal: Spacing.md,
+    paddingTop: Spacing.md,
     paddingBottom: Spacing.sm,
   },
-  heroTitle: {
+  greeting: {
+    ...Typography.body,
+    color: Colors.textSecondary,
+    marginBottom: 2,
+  },
+  headerTitle: {
     ...Typography.h1,
     color: Colors.text,
-    marginBottom: Spacing.xs,
   },
-  heroSubtitle: {
+  searchBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.surfaceAlt,
+    borderRadius: BorderRadius.lg,
+    marginHorizontal: Spacing.md,
+    marginVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm + 4,
+    gap: Spacing.sm,
+  },
+  searchInput: {
     ...Typography.body,
+    color: Colors.text,
+    flex: 1,
+    paddingVertical: 0,
+  },
+  headerSubtitle: {
+    ...Typography.bodySmall,
+    color: Colors.textTertiary,
+    marginTop: 2,
+  },
+  aiCard: {
+    marginHorizontal: Spacing.md,
+    marginVertical: Spacing.sm,
+    paddingHorizontal: Spacing.sm + 6,
+    paddingVertical: Spacing.sm + 4,
+    backgroundColor: Colors.primarySoft,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: "rgba(255, 48, 8, 0.1)",
+  },
+  aiCardRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm + 2,
+  },
+  aiCardTitle: {
+    ...Typography.h3,
+    color: Colors.text,
+    marginBottom: 1,
+  },
+  aiCardSubtitle: {
+    ...Typography.caption,
+    color: Colors.textTertiary,
+    fontStyle: "italic",
+  },
+  aiCardBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.xs,
+    backgroundColor: Colors.primary,
+    paddingHorizontal: Spacing.sm + 4,
+    paddingVertical: Spacing.xs + 3,
+    borderRadius: BorderRadius.full,
+  },
+  aiCardBtnText: {
+    fontSize: 11,
+    color: Colors.textLight,
+    fontWeight: "600",
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: Spacing.md,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.sm,
+  },
+  sectionTitle: {
+    ...Typography.h2,
+    color: Colors.text,
+  },
+  sectionCount: {
+    ...Typography.caption,
     color: Colors.textSecondary,
   },
   centered: {
@@ -180,7 +364,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: Colors.background,
-    padding: Spacing.lg,
+    padding: Spacing.xl,
   },
   loadingText: {
     ...Typography.body,
@@ -192,21 +376,21 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   errorTitle: {
-    ...Typography.h3,
+    ...Typography.h2,
     color: Colors.text,
     marginBottom: Spacing.sm,
   },
   errorMessage: {
-    ...Typography.bodySmall,
+    ...Typography.body,
     color: Colors.textSecondary,
     textAlign: "center",
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.lg,
   },
   retryButton: {
     backgroundColor: Colors.primary,
     paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.md,
+    paddingVertical: Spacing.sm + 4,
+    borderRadius: BorderRadius.full,
   },
   retryButtonText: {
     ...Typography.button,
@@ -215,18 +399,24 @@ const styles = StyleSheet.create({
   toast: {
     position: "absolute",
     bottom: Spacing.lg,
-    left: Spacing.lg,
-    right: Spacing.lg,
+    left: Spacing.md,
+    right: Spacing.md,
     backgroundColor: Colors.secondary,
-    borderRadius: BorderRadius.md,
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.lg,
+    borderRadius: BorderRadius.sm,
+    paddingVertical: Spacing.sm + 4,
+    paddingHorizontal: Spacing.md,
+    ...Shadows.large,
+  },
+  toastContent: {
+    flexDirection: "row",
     alignItems: "center",
+    gap: Spacing.sm,
   },
   toastText: {
     ...Typography.bodySmall,
     color: Colors.textLight,
-    fontWeight: "600",
+    fontWeight: "500",
+    flex: 1,
   },
   emptyContainer: {
     alignItems: "center",
@@ -235,6 +425,11 @@ const styles = StyleSheet.create({
   emptyEmoji: {
     fontSize: 48,
     marginBottom: Spacing.md,
+  },
+  emptyTitle: {
+    ...Typography.h3,
+    color: Colors.text,
+    marginBottom: Spacing.xs,
   },
   emptyText: {
     ...Typography.body,

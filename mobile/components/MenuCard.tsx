@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useState, useRef } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Image } from "react-native";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { MenuItem } from "@/types";
 import {
   Colors,
@@ -8,27 +9,8 @@ import {
   Typography,
   Shadows,
 } from "@/constants/theme";
+import { menuImages } from "@/constants/images";
 
-const itemEmojis: Record<string, string> = {
-  burger: "🍔",
-  "chicken-sandwich": "🍗",
-  salmon: "🐟",
-  pasta: "🍝",
-  tacos: "🌮",
-  fries: "🍟",
-  salad: "🥗",
-  "onion-rings": "🧅",
-  "sweet-potato": "🍠",
-  "mac-cheese": "🧀",
-  lemonade: "🍋",
-  "iced-tea": "🍵",
-  "root-beer": "🍺",
-  "sparkling-water": "💧",
-  brownie: "🍫",
-  cheesecake: "🍰",
-  churros: "🥐",
-  sorbet: "🍧",
-};
 
 interface MenuCardProps {
   item: MenuItem;
@@ -36,129 +18,168 @@ interface MenuCardProps {
 }
 
 export default function MenuCard({ item, onAddToCart }: MenuCardProps) {
-  const emoji = itemEmojis[item.image] || "🍽️";
+  const imageSource = menuImages[item.image];
   const [added, setAdded] = useState(false);
+  const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const handleAdd = () => {
     onAddToCart(item);
     setAdded(true);
+
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 0.97,
+        duration: 60,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        useNativeDriver: true,
+        tension: 200,
+        friction: 10,
+      }),
+    ]).start();
+
     setTimeout(() => setAdded(false), 1200);
   };
 
   return (
-    <View style={styles.card}>
-      <View style={styles.emojiContainer}>
-        <Text style={styles.emoji}>{emoji}</Text>
-      </View>
-
-      <View style={styles.content}>
-        <View style={styles.header}>
+    <Animated.View style={[styles.card, { transform: [{ scale: scaleAnim }] }]}>
+      <TouchableOpacity
+        style={styles.cardInner}
+        onPress={handleAdd}
+        activeOpacity={0.7}
+      >
+        <View style={styles.textSection}>
           <Text style={styles.name} numberOfLines={1}>
             {item.name}
           </Text>
-          {item.popular && (
-            <View style={styles.popularBadge}>
-              <Text style={styles.popularText}>Popular</Text>
-            </View>
-          )}
+
+          <Text style={styles.description} numberOfLines={3}>
+            {item.description}
+          </Text>
+
+          <View style={styles.metaRow}>
+            <Text style={styles.price}>${item.price.toFixed(2)}</Text>
+            {item.availableModifiers && item.availableModifiers.length > 0 && (
+              <View style={styles.customBadge}>
+                <Text style={styles.customBadgeText}>Customizable</Text>
+              </View>
+            )}
+          </View>
         </View>
 
-        <Text style={styles.description} numberOfLines={2}>
-          {item.description}
-        </Text>
-
-        <View style={styles.footer}>
-          <Text style={styles.price}>${item.price.toFixed(2)}</Text>
+        <View style={styles.imageSection}>
+          <View style={styles.imageWrap}>
+            {imageSource ? (
+              <Image source={imageSource} style={styles.foodImage} />
+            ) : (
+              <Text style={styles.fallbackEmoji}>🍽️</Text>
+            )}
+          </View>
           <TouchableOpacity
-            style={[styles.addButton, added && styles.addedButton]}
+            style={[styles.addBtn, added && styles.addBtnActive]}
             onPress={handleAdd}
-            activeOpacity={0.7}
+            activeOpacity={0.8}
           >
-            <Text style={styles.addButtonText}>
-              {added ? "✓ Added" : "+ Add"}
-            </Text>
+            {added ? (
+              <FontAwesome name="check" size={12} color={Colors.textLight} />
+            ) : (
+              <FontAwesome name="plus" size={12} color={Colors.textLight} />
+            )}
           </TouchableOpacity>
         </View>
-      </View>
-    </View>
+      </TouchableOpacity>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    flexDirection: "row",
-    backgroundColor: Colors.surface,
+    marginHorizontal: Spacing.sm + 4,
+    marginBottom: Spacing.sm + 4,
     borderRadius: BorderRadius.lg,
-    marginHorizontal: Spacing.md,
-    marginBottom: Spacing.md,
-    padding: Spacing.md,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
     ...Shadows.small,
   },
-  emojiContainer: {
-    width: 72,
-    height: 72,
-    borderRadius: BorderRadius.md,
-    backgroundColor: Colors.surfaceAlt,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: Spacing.md,
-  },
-  emoji: {
-    fontSize: 36,
-  },
-  content: {
-    flex: 1,
-    justifyContent: "space-between",
-  },
-  header: {
+  cardInner: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.sm,
-    marginBottom: 2,
+    padding: Spacing.sm + 6,
+    gap: Spacing.sm + 4,
+  },
+  textSection: {
+    flex: 1,
+    justifyContent: "center",
   },
   name: {
     ...Typography.h3,
     color: Colors.text,
-    flex: 1,
-  },
-  popularBadge: {
-    backgroundColor: Colors.accent,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 2,
-    borderRadius: BorderRadius.full,
-  },
-  popularText: {
-    ...Typography.caption,
-    fontWeight: "700",
-    color: Colors.secondary,
+    marginBottom: 3,
   },
   description: {
     ...Typography.bodySmall,
     color: Colors.textSecondary,
-    lineHeight: 20,
+    lineHeight: 18,
     marginBottom: Spacing.sm,
   },
-  footer: {
+  metaRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    gap: Spacing.sm,
   },
   price: {
     ...Typography.price,
-    color: Colors.primary,
+    color: Colors.text,
   },
-  addButton: {
+  customBadge: {
+    backgroundColor: Colors.surfaceAlt,
+    borderRadius: BorderRadius.full,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+  },
+  customBadgeText: {
+    fontSize: 10,
+    fontWeight: "600" as const,
+    color: Colors.textSecondary,
+  },
+  imageSection: {
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
+  imageWrap: {
+    width: 88,
+    height: 88,
+    borderRadius: BorderRadius.md + 2,
+    backgroundColor: Colors.surfaceAlt,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+  },
+  foodImage: {
+    width: 88,
+    height: 88,
+    borderRadius: BorderRadius.md + 2,
+  },
+  fallbackEmoji: {
+    fontSize: 40,
+  },
+  addBtn: {
+    position: "absolute",
+    bottom: -6,
+    right: -6,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: Colors.primary,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.sm,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: Colors.surface,
   },
-  addedButton: {
+  addBtnActive: {
     backgroundColor: Colors.success,
-  },
-  addButtonText: {
-    ...Typography.button,
-    color: Colors.textLight,
-    fontSize: 14,
   },
 });

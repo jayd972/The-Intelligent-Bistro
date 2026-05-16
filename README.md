@@ -10,10 +10,11 @@ Customers can browse a curated restaurant menu, manage their cart through tradit
 
 - **Menu Browsing** — Scroll through 18 items across 4 categories (Mains, Sides, Drinks, Desserts) with category filter chips
 - **Cart Management** — Add, remove, and adjust quantities with live price totals including tax
-- **AI Assistant** — Type natural language like _"Add two burgers and a large lemonade"_ and the cart updates automatically
+- **AI Assistant** — A dedicated chat tab where you can type natural language like _"Add two burgers and a large lemonade"_ and the cart updates automatically
 - **Dual Input** — Both UI buttons and AI assistant feed into the same cart state (single source of truth)
 - **Fallback Parser** — Works without an OpenAI API key using a built-in keyword parser
-- **Polished UI** — Consistent design system with toast notifications, loading states, empty states, and error handling
+- **Search** — Real-time search across menu items by name or description
+- **Polished UI** — Consistent design system with toast notifications, loading states, empty states, animated transitions, and error handling
 
 ---
 
@@ -43,26 +44,36 @@ intelligent-bistro/
 │   │   │   ├── aiParser.ts       # OpenAI-based parser
 │   │   │   └── fallbackParser.ts # Keyword-based fallback
 │   │   ├── data/
-│   │   │   └── menu.ts           # Static menu dataset
+│   │   │   └── menu.ts           # Static menu dataset (18 items)
 │   │   └── types/
 │   │       └── index.ts          # Shared TypeScript types
+│   ├── __tests__/
+│   │   └── fallbackParser.test.ts # Parser unit tests
 │   ├── package.json
 │   └── tsconfig.json
 ├── mobile/
 │   ├── app/
 │   │   ├── _layout.tsx           # Root layout + CartProvider
+│   │   ├── order-confirmation.tsx # Animated order success screen
 │   │   └── (tabs)/
 │   │       ├── _layout.tsx       # Tab navigator (Menu, Cart, Assistant)
 │   │       ├── index.tsx         # Menu browsing screen
 │   │       ├── cart.tsx          # Cart screen
 │   │       └── assistant.tsx     # AI chat screen
-│   ├── components/               # Reusable UI components
+│   ├── components/
+│   │   ├── MenuCard.tsx          # Menu item card with food image
+│   │   ├── CartItemCard.tsx      # Cart item with quantity stepper
+│   │   ├── CategoryFilter.tsx    # Horizontal category chips
+│   │   ├── ChatPopup.tsx         # Floating AI chat (FAB + popup panel)
+│   │   ├── ChatBubble.tsx        # Chat message bubble + typing indicator
+│   │   └── QuantityStepper.tsx   # +/− quantity control
 │   ├── context/
 │   │   └── CartContext.tsx        # Cart state (useReducer)
 │   ├── services/
 │   │   └── api.ts                # API client
 │   ├── constants/
-│   │   └── theme.ts              # Design tokens
+│   │   ├── theme.ts              # Design tokens
+│   │   └── images.ts             # Menu item image mapping
 │   └── types/
 │       └── index.ts              # TypeScript interfaces
 └── README.md
@@ -199,6 +210,3 @@ The app gracefully degrades: if OpenAI fails (rate limit, network error), it fal
 - Real payment processing integration
 
 ---
-## License
-
-MIT

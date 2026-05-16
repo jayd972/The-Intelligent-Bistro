@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React, { useRef, useEffect } from "react";
+import { View, Text, StyleSheet, Animated } from "react-native";
 import { ChatMessage } from "@/types";
 import { Colors, Spacing, BorderRadius, Typography } from "@/constants/theme";
 
@@ -48,13 +48,41 @@ export default function ChatBubble({ message }: ChatBubbleProps) {
 }
 
 export function TypingIndicator() {
+  const dot1 = useRef(new Animated.Value(0)).current;
+  const dot2 = useRef(new Animated.Value(0)).current;
+  const dot3 = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const animate = (dot: Animated.Value, delay: number) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.delay(delay),
+          Animated.timing(dot, { toValue: -5, duration: 300, useNativeDriver: true }),
+          Animated.timing(dot, { toValue: 0, duration: 300, useNativeDriver: true }),
+        ])
+      );
+
+    const a1 = animate(dot1, 0);
+    const a2 = animate(dot2, 150);
+    const a3 = animate(dot3, 300);
+    a1.start();
+    a2.start();
+    a3.start();
+
+    return () => { a1.stop(); a2.stop(); a3.stop(); };
+  }, [dot1, dot2, dot3]);
+
   return (
     <View style={styles.row}>
       <View style={styles.avatar}>
         <Text style={styles.avatarText}>🤖</Text>
       </View>
       <View style={[styles.bubble, styles.bubbleAssistant, styles.typingBubble]}>
-        <Text style={styles.typingDots}>●  ●  ●</Text>
+        <View style={styles.dotsContainer}>
+          <Animated.View style={[styles.dot, { transform: [{ translateY: dot1 }] }]} />
+          <Animated.View style={[styles.dot, { transform: [{ translateY: dot2 }] }]} />
+          <Animated.View style={[styles.dot, { transform: [{ translateY: dot3 }] }]} />
+        </View>
       </View>
     </View>
   );
@@ -64,43 +92,41 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "flex-end",
-    marginBottom: Spacing.md,
-    paddingHorizontal: Spacing.md,
+    marginBottom: Spacing.sm + 2,
+    paddingHorizontal: Spacing.sm + 2,
   },
   rowUser: {
     justifyContent: "flex-end",
   },
   avatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: Colors.surfaceAlt,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: Spacing.sm,
+    marginRight: Spacing.xs + 2,
   },
   avatarText: {
-    fontSize: 16,
+    fontSize: 14,
   },
   bubble: {
-    maxWidth: "75%",
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm + 2,
+    maxWidth: "78%",
+    paddingHorizontal: Spacing.sm + 4,
+    paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.lg,
   },
   bubbleUser: {
     backgroundColor: Colors.primary,
-    borderBottomRightRadius: 4,
+    borderBottomRightRadius: BorderRadius.xs,
   },
   bubbleAssistant: {
-    backgroundColor: Colors.surface,
-    borderBottomLeftRadius: 4,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    backgroundColor: Colors.surfaceAlt,
+    borderBottomLeftRadius: BorderRadius.xs,
   },
   text: {
-    ...Typography.body,
-    lineHeight: 22,
+    ...Typography.bodySmall,
+    lineHeight: 19,
   },
   textUser: {
     color: Colors.textLight,
@@ -109,22 +135,30 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   time: {
-    ...Typography.caption,
-    marginTop: 4,
+    fontSize: 10,
+    marginTop: 3,
   },
   timeUser: {
-    color: "rgba(255,255,255,0.7)",
+    color: "rgba(255,255,255,0.6)",
     textAlign: "right",
   },
   timeAssistant: {
-    color: Colors.textSecondary,
+    color: Colors.textTertiary,
   },
   typingBubble: {
-    paddingVertical: Spacing.md,
+    paddingVertical: Spacing.sm + 2,
   },
-  typingDots: {
-    color: Colors.textSecondary,
-    fontSize: 14,
-    letterSpacing: 2,
+  dotsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingVertical: 2,
+    paddingHorizontal: 4,
+  },
+  dot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: Colors.textTertiary,
   },
 });

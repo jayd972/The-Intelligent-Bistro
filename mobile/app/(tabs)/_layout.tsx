@@ -1,8 +1,8 @@
 import React from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Tabs } from "expo-router";
-import { View, Text, StyleSheet } from "react-native";
-import { Colors } from "@/constants/theme";
+import { View, Text, StyleSheet, Platform } from "react-native";
+import { Colors, BorderRadius } from "@/constants/theme";
 import { useCart } from "@/context/CartContext";
 
 function TabBarIcon(props: {
@@ -12,11 +12,13 @@ function TabBarIcon(props: {
 }) {
   const { badge, ...iconProps } = props;
   return (
-    <View>
-      <FontAwesome size={24} style={{ marginBottom: -2 }} {...iconProps} />
+    <View style={iconStyles.iconWrap}>
+      <FontAwesome size={22} {...iconProps} />
       {badge !== undefined && badge > 0 && (
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>{badge > 99 ? "99+" : badge}</Text>
+        <View style={iconStyles.badge}>
+          <Text style={iconStyles.badgeText}>
+            {badge > 99 ? "99+" : badge}
+          </Text>
         </View>
       )}
     </View>
@@ -30,17 +32,20 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.textSecondary,
+        tabBarInactiveTintColor: Colors.textTertiary,
+        tabBarShowLabel: true,
         tabBarStyle: {
           backgroundColor: Colors.surface,
-          borderTopColor: Colors.border,
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 4,
+          borderTopWidth: 1,
+          borderTopColor: Colors.borderLight,
+          height: Platform.OS === "ios" ? 88 : 72,
+          paddingBottom: Platform.OS === "ios" ? 24 : 10,
+          paddingTop: 6,
         },
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: "600",
+          marginTop: 4,
         },
         headerStyle: {
           backgroundColor: Colors.surface,
@@ -48,7 +53,7 @@ export default function TabLayout() {
         headerTitleStyle: {
           color: Colors.text,
           fontWeight: "700",
-          fontSize: 18,
+          fontSize: 17,
         },
         headerShadowVisible: false,
       }}
@@ -57,8 +62,9 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "Menu",
+          headerShown: false,
           tabBarIcon: ({ color }) => (
-            <TabBarIcon name="cutlery" color={color} />
+            <TabBarIcon name="home" color={color} />
           ),
         }}
       />
@@ -78,7 +84,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="assistant"
         options={{
-          title: "AI Assistant",
+          title: "Ask Bistro",
+          headerShown: false,
           tabBarIcon: ({ color }) => (
             <TabBarIcon name="comment" color={color} />
           ),
@@ -88,13 +95,20 @@ export default function TabLayout() {
   );
 }
 
-const styles = StyleSheet.create({
+const iconStyles = StyleSheet.create({
+  iconWrap: {
+    position: "relative",
+    width: 28,
+    height: 28,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   badge: {
     position: "absolute",
-    top: -6,
-    right: -10,
+    top: -4,
+    right: -12,
     backgroundColor: Colors.primary,
-    borderRadius: 10,
+    borderRadius: BorderRadius.full,
     minWidth: 18,
     height: 18,
     alignItems: "center",

@@ -17,7 +17,7 @@ interface CategoryFilterProps {
 const categories: { key: MenuCategory | "all"; label: string; icon: string }[] =
   [
     { key: "all", label: "All", icon: "🍽️" },
-    { key: "mains", label: "Mains", icon: "🥘" },
+    { key: "mains", label: "Mains", icon: "🍔" },
     { key: "sides", label: "Sides", icon: "🍟" },
     { key: "drinks", label: "Drinks", icon: "🥤" },
     { key: "desserts", label: "Desserts", icon: "🍰" },
@@ -43,7 +43,9 @@ export default function CategoryFilter({
               onPress={() => onSelect(cat.key)}
               activeOpacity={0.7}
             >
-              <Text style={styles.chipIcon}>{cat.icon}</Text>
+              <View style={[styles.iconCircle, isActive && styles.iconCircleActive]}>
+                <Text style={styles.chipIcon}>{cat.icon}</Text>
+              </View>
               <Text
                 style={[styles.chipText, isActive && styles.chipTextActive]}
               >
@@ -59,37 +61,46 @@ export default function CategoryFilter({
 
 const styles = StyleSheet.create({
   wrapper: {
-    backgroundColor: Colors.background,
-    paddingVertical: Spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
   },
   container: {
-    paddingHorizontal: Spacing.md,
-    gap: Spacing.sm,
+    paddingHorizontal: Spacing.sm + 4,
+    paddingVertical: Spacing.sm + 2,
+    gap: Spacing.sm + 4,
+    justifyContent: "space-between",
   },
   chip: {
-    flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm + 2,
-    borderRadius: BorderRadius.full,
-    backgroundColor: Colors.surface,
-    borderWidth: 1.5,
-    borderColor: Colors.border,
-    gap: 6,
+    gap: Spacing.xs,
+    paddingVertical: Spacing.xs + 2,
+    paddingHorizontal: Spacing.xs + 2,
+    borderRadius: BorderRadius.lg,
   },
   chipActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: Colors.primarySoft,
+  },
+  iconCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: Colors.surfaceAlt,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconCircleActive: {
+    backgroundColor: Colors.primarySoft,
   },
   chipIcon: {
-    fontSize: 16,
+    fontSize: 22,
   },
   chipText: {
-    ...Typography.bodySmall,
-    fontWeight: "600",
+    ...Typography.caption,
+    fontWeight: "500",
     color: Colors.textSecondary,
   },
   chipTextActive: {
-    color: Colors.textLight,
+    color: Colors.primary,
+    fontWeight: "700",
   },
 });

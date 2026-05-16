@@ -5,8 +5,10 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
-import { Colors } from "@/constants/theme";
+import { View, StyleSheet, Platform } from "react-native";
+import { Colors, Shadows } from "@/constants/theme";
 import { CartProvider } from "@/context/CartContext";
+
 
 export { ErrorBoundary } from "expo-router";
 
@@ -28,6 +30,30 @@ const bistroTheme = {
   },
 };
 
+/** Max width for web preview so Chrome looks like a phone, not a stretched desktop layout */
+const WEB_PHONE_MAX_WIDTH = 430;
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+  webOuter: {
+    flex: 1,
+    width: "100%",
+    alignItems: "center",
+    backgroundColor: "#E4E4E7",
+    ...(Platform.OS === "web" ? { minHeight: "100vh" as any } : {}),
+  },
+  webPhone: {
+    flex: 1,
+    width: "100%",
+    maxWidth: WEB_PHONE_MAX_WIDTH,
+    backgroundColor: Colors.background,
+    overflow: "hidden",
+    ...Shadows.large,
+  },
+});
+
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
@@ -48,14 +74,32 @@ export default function RootLayout() {
     return null;
   }
 
+  const appShell = (
+    <Stack>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="order-confirmation"
+        options={{
+          headerShown: false,
+          presentation: "modal",
+          gestureEnabled: false,
+        }}
+      />
+      <Stack.Screen name="+not-found" />
+    </Stack>
+  );
+
   return (
     <CartProvider>
       <ThemeProvider value={bistroTheme}>
         <StatusBar style="dark" />
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
+        {Platform.OS === "web" ? (
+          <View style={styles.webOuter}>
+            <View style={styles.webPhone}>{appShell}</View>
+          </View>
+        ) : (
+          <View style={styles.root}>{appShell}</View>
+        )}
       </ThemeProvider>
     </CartProvider>
   );

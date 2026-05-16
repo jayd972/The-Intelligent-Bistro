@@ -5,6 +5,7 @@ import {
   FlatList,
   TouchableOpacity,
   Alert,
+  Platform,
 } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useRouter } from "expo-router";
@@ -18,27 +19,37 @@ export default function CartScreen() {
   const router = useRouter();
 
   const handleClearCart = () => {
-    Alert.alert("Clear Cart", "Remove all items from your cart?", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Clear", style: "destructive", onPress: clearCart },
-    ]);
+    if (Platform.OS === "web") {
+      const confirmed = window.confirm("Remove all items from your cart?");
+      if (confirmed) clearCart();
+    } else {
+      Alert.alert("Clear Cart", "Remove all items from your cart?", [
+        { text: "Cancel", style: "cancel" },
+        { text: "Clear", style: "destructive", onPress: clearCart },
+      ]);
+    }
   };
 
   const handlePlaceOrder = () => {
-    Alert.alert(
-      "Order Placed! 🎉",
-      `Your order of $${total.toFixed(2)} has been received.\nThank you for dining with Intelligent Bistro!`,
-      [{ text: "OK", onPress: clearCart }]
-    );
+    const orderNumber = Math.floor(1000 + Math.random() * 9000).toString();
+    const itemCount = items.length.toString();
+    const orderTotal = total.toFixed(2);
+    clearCart();
+    router.push({
+      pathname: "/order-confirmation",
+      params: { total: orderTotal, itemCount, orderNumber },
+    });
   };
 
   if (items.length === 0) {
     return (
       <View style={styles.emptyContainer}>
-        <Text style={styles.emptyEmoji}>🛒</Text>
+        <View style={styles.emptyIconWrap}>
+          <FontAwesome name="shopping-cart" size={32} color={Colors.textTertiary} />
+        </View>
         <Text style={styles.emptyTitle}>Your cart is empty</Text>
         <Text style={styles.emptySubtitle}>
-          Browse the menu and add some delicious items!
+          Add items from the menu to get started
         </Text>
         <TouchableOpacity
           style={styles.browseButton}
@@ -50,6 +61,8 @@ export default function CartScreen() {
       </View>
     );
   }
+
+  const totalQty = items.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
     <View style={styles.container}>
@@ -66,10 +79,13 @@ export default function CartScreen() {
         ListHeaderComponent={
           <View style={styles.listHeader}>
             <Text style={styles.itemCount}>
-              {items.length} item{items.length !== 1 ? "s" : ""} in cart
+              {totalQty} item{totalQty !== 1 ? "s" : ""}
             </Text>
-            <TouchableOpacity onPress={handleClearCart}>
-              <Text style={styles.clearText}>Clear All</Text>
+            <TouchableOpacity
+              onPress={handleClearCart}
+              activeOpacity={0.6}
+            >
+              <Text style={styles.clearText}>Clear all</Text>
             </TouchableOpacity>
           </View>
         }
@@ -83,11 +99,11 @@ export default function CartScreen() {
           <Text style={styles.summaryValue}>${subtotal.toFixed(2)}</Text>
         </View>
         <View style={styles.summaryRow}>
-          <Text style={styles.summaryLabel}>Tax (8%)</Text>
+          <Text style={styles.summaryLabel}>Tax & fees</Text>
           <Text style={styles.summaryValue}>${tax.toFixed(2)}</Text>
         </View>
         <View style={styles.divider} />
-        <View style={styles.summaryRow}>
+        <View style={styles.totalRow}>
           <Text style={styles.totalLabel}>Total</Text>
           <Text style={styles.totalValue}>${total.toFixed(2)}</Text>
         </View>
@@ -95,15 +111,9 @@ export default function CartScreen() {
         <TouchableOpacity
           style={styles.orderButton}
           onPress={handlePlaceOrder}
-          activeOpacity={0.8}
+          activeOpacity={0.85}
         >
-          <FontAwesome
-            name="check-circle"
-            size={20}
-            color={Colors.textLight}
-            style={{ marginRight: Spacing.sm }}
-          />
-          <Text style={styles.orderButtonText}>Place Order</Text>
+          <Text style={styles.orderButtonText}>Place Order · ${total.toFixed(2)}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -116,31 +126,34 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   listContent: {
-    paddingTop: Spacing.sm,
     paddingBottom: Spacing.md,
   },
   listHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
   },
   itemCount: {
-    ...Typography.bodySmall,
-    color: Colors.textSecondary,
+    ...Typography.body,
+    color: Colors.text,
+    fontWeight: "600",
   },
   clearText: {
     ...Typography.bodySmall,
-    color: Colors.error,
-    fontWeight: "600",
+    color: Colors.primary,
+    fontWeight: "500",
   },
   summaryContainer: {
     backgroundColor: Colors.surface,
-    borderTopLeftRadius: BorderRadius.xl,
-    borderTopRightRadius: BorderRadius.xl,
-    padding: Spacing.lg,
-    ...Shadows.medium,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+    paddingHorizontal: Spacing.md,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.lg,
   },
   summaryRow: {
     flexDirection: "row",
@@ -157,46 +170,57 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.borderLight,
     marginVertical: Spacing.sm,
+  },
+  totalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: Spacing.md,
   },
   totalLabel: {
     ...Typography.h3,
     color: Colors.text,
+    fontWeight: "700",
   },
   totalValue: {
     ...Typography.h2,
-    color: Colors.primary,
+    color: Colors.text,
   },
   orderButton: {
     backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.md,
-    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.sm,
+    paddingVertical: Spacing.sm + 6,
     alignItems: "center",
     justifyContent: "center",
-    flexDirection: "row",
-    marginTop: Spacing.md,
   },
   orderButtonText: {
     ...Typography.button,
     color: Colors.textLight,
-    fontSize: 18,
+    fontSize: 16,
+    fontWeight: "700",
   },
   emptyContainer: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: Colors.background,
-    padding: Spacing.lg,
+    padding: Spacing.xl,
   },
-  emptyEmoji: {
-    fontSize: 64,
+  emptyIconWrap: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: Colors.surfaceAlt,
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: Spacing.md,
   },
   emptyTitle: {
     ...Typography.h2,
     color: Colors.text,
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.xs,
   },
   emptySubtitle: {
     ...Typography.body,
@@ -207,8 +231,8 @@ const styles = StyleSheet.create({
   browseButton: {
     backgroundColor: Colors.primary,
     paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.md,
+    paddingVertical: Spacing.sm + 4,
+    borderRadius: BorderRadius.full,
   },
   browseButtonText: {
     ...Typography.button,
