@@ -2,6 +2,15 @@ import { Router } from "express";
 import { AssistantRequest } from "../types";
 import { aiParse } from "../services/aiParser";
 import { fallbackParse } from "../services/fallbackParser";
+import fs from "fs";
+import path from "path";
+
+const LOG_FILE = path.join(__dirname, "../../debug.log");
+function log(msg: string) {
+  const line = `[${new Date().toISOString()}] ${msg}\n`;
+  fs.appendFileSync(LOG_FILE, line);
+  console.log(msg);
+}
 
 const router = Router();
 
@@ -14,28 +23,35 @@ router.post("/", async (req, res) => {
   }
 
   const useAI = !!process.env.OPENAI_API_KEY;
+  log(`━━━ New request ━━━`);
+  log(`Message: "${message.trim()}"`);
+  log(`OPENAI_API_KEY present: ${useAI}`);
+  log(`Key prefix: ${process.env.OPENAI_API_KEY?.substring(0, 12)}...`);
+  log(`Parser: ${useAI ? "AI (gpt-4o-mini)" : "Fallback (regex)"}`);
 
   try {
     const result = useAI
       ? await aiParse(message.trim())
       : fallbackParse(message.trim());
 
-    console.log(
-      `[${useAI ? "AI" : "Fallback"}] "${message.trim()}" → ${result.actions.length} action(s)`
-    );
+    log(`SUCCESS [${useAI ? "AI" : "Fallback"}] => ${result.actions.length} action(s), intent: ${result.intent}`);
+    log(`Response: "${result.assistantMessage.substring(0, 100)}"`);
 
     res.json(result);
-  } catch (error) {
-    console.error("Assistant error:", error);
+  } catch (error: any) {
+    log(`FAILED AI parser: ${error?.message || error}`);
+    log(`Error type: ${error?.constructor?.name}`);
+    if (error?.status) log(`HTTP status: ${error.status}`);
 
     if (useAI) {
-      console.log("AI parser failed, falling back to keyword parser");
+      log(`Falling back to keyword parser...`);
       try {
         const fallbackResult = fallbackParse(message.trim());
+        log(`SUCCESS [Fallback] => ${fallbackResult.actions.length} action(s)`);
         res.json(fallbackResult);
         return;
-      } catch (fallbackError) {
-        console.error("Fallback parser also failed:", fallbackError);
+      } catch (fallbackError: any) {
+        log(`Fallback parser also failed: ${fallbackError?.message}`);
       }
     }
 

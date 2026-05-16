@@ -159,7 +159,7 @@ export default function MenuScreen() {
                 <Text style={styles.headerTitle}>
                   Intelligent Bistro
                 </Text>
-                <Text style={styles.headerSubtitle}>AI-powered ordering</Text>
+                <Text style={styles.headerSubtitle}>Your smart restaurant assistant</Text>
               </View>
             </View>
 
@@ -188,14 +188,16 @@ export default function MenuScreen() {
             >
               <View style={styles.aiCardRow}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.aiCardTitle}>🤖 Order with AI</Text>
+                  <Text style={styles.aiCardTitle}>🤖 Ask Bistro</Text>
+                  <Text style={styles.aiCardDesc}>
+                    Tell me what you want and I'll build your cart.
+                  </Text>
                   <Text style={styles.aiCardSubtitle}>
                     "Add two spicy chicken sandwiches and a lemonade"
                   </Text>
                 </View>
                 <View style={styles.aiCardBtn}>
-                  <FontAwesome name="comment" size={11} color={Colors.textLight} />
-                  <Text style={styles.aiCardBtnText}>Ask AI</Text>
+                  <Text style={styles.aiCardBtnText}>Start ordering</Text>
                 </View>
               </View>
             </TouchableOpacity>
@@ -323,6 +325,11 @@ const styles = StyleSheet.create({
     ...Typography.h3,
     color: Colors.text,
     marginBottom: 1,
+  },
+  aiCardDesc: {
+    ...Typography.bodySmall,
+    color: Colors.textSecondary,
+    marginBottom: 2,
   },
   aiCardSubtitle: {
     ...Typography.caption,
