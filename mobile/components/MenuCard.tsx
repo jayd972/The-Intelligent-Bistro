@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Animated } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Image } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { MenuItem } from "@/types";
 import {
@@ -8,27 +8,8 @@ import {
   BorderRadius,
   Typography,
 } from "@/constants/theme";
+import { menuImages } from "@/constants/images";
 
-const itemEmojis: Record<string, string> = {
-  burger: "🍔",
-  "chicken-sandwich": "🍗",
-  salmon: "🐟",
-  pasta: "🍝",
-  tacos: "🌮",
-  fries: "🍟",
-  salad: "🥗",
-  "onion-rings": "🧅",
-  "sweet-potato": "🍠",
-  "mac-cheese": "🧀",
-  lemonade: "🍋",
-  "iced-tea": "🍵",
-  "root-beer": "🍺",
-  "sparkling-water": "💧",
-  brownie: "🍫",
-  cheesecake: "🍰",
-  churros: "🥐",
-  sorbet: "🍧",
-};
 
 interface MenuCardProps {
   item: MenuItem;
@@ -36,7 +17,7 @@ interface MenuCardProps {
 }
 
 export default function MenuCard({ item, onAddToCart }: MenuCardProps) {
-  const emoji = itemEmojis[item.image] || "🍽️";
+  const imageSource = menuImages[item.image];
   const [added, setAdded] = useState(false);
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
@@ -96,8 +77,12 @@ export default function MenuCard({ item, onAddToCart }: MenuCardProps) {
         </View>
 
         <View style={styles.imageSection}>
-          <View style={styles.emojiWrap}>
-            <Text style={styles.emoji}>{emoji}</Text>
+          <View style={styles.imageWrap}>
+            {imageSource ? (
+              <Image source={imageSource} style={styles.foodImage} />
+            ) : (
+              <Text style={styles.fallbackEmoji}>🍽️</Text>
+            )}
           </View>
           <TouchableOpacity
             style={[styles.addBtn, added && styles.addBtnActive]}
@@ -181,15 +166,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     position: "relative",
   },
-  emojiWrap: {
+  imageWrap: {
     width: 96,
     height: 96,
     borderRadius: BorderRadius.md,
     backgroundColor: Colors.surfaceAlt,
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
   },
-  emoji: {
+  foodImage: {
+    width: 96,
+    height: 96,
+    borderRadius: BorderRadius.md,
+  },
+  fallbackEmoji: {
     fontSize: 44,
   },
   addBtn: {

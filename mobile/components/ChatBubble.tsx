@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React, { useRef, useEffect } from "react";
+import { View, Text, StyleSheet, Animated } from "react-native";
 import { ChatMessage } from "@/types";
 import { Colors, Spacing, BorderRadius, Typography } from "@/constants/theme";
 
@@ -48,13 +48,41 @@ export default function ChatBubble({ message }: ChatBubbleProps) {
 }
 
 export function TypingIndicator() {
+  const dot1 = useRef(new Animated.Value(0)).current;
+  const dot2 = useRef(new Animated.Value(0)).current;
+  const dot3 = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const animate = (dot: Animated.Value, delay: number) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.delay(delay),
+          Animated.timing(dot, { toValue: -5, duration: 300, useNativeDriver: true }),
+          Animated.timing(dot, { toValue: 0, duration: 300, useNativeDriver: true }),
+        ])
+      );
+
+    const a1 = animate(dot1, 0);
+    const a2 = animate(dot2, 150);
+    const a3 = animate(dot3, 300);
+    a1.start();
+    a2.start();
+    a3.start();
+
+    return () => { a1.stop(); a2.stop(); a3.stop(); };
+  }, [dot1, dot2, dot3]);
+
   return (
     <View style={styles.row}>
       <View style={styles.avatar}>
         <Text style={styles.avatarText}>🤖</Text>
       </View>
       <View style={[styles.bubble, styles.bubbleAssistant, styles.typingBubble]}>
-        <Text style={styles.typingDots}>●  ●  ●</Text>
+        <View style={styles.dotsContainer}>
+          <Animated.View style={[styles.dot, { transform: [{ translateY: dot1 }] }]} />
+          <Animated.View style={[styles.dot, { transform: [{ translateY: dot2 }] }]} />
+          <Animated.View style={[styles.dot, { transform: [{ translateY: dot3 }] }]} />
+        </View>
       </View>
     </View>
   );
@@ -120,9 +148,17 @@ const styles = StyleSheet.create({
   typingBubble: {
     paddingVertical: Spacing.sm + 2,
   },
-  typingDots: {
-    color: Colors.textTertiary,
-    fontSize: 12,
-    letterSpacing: 2,
+  dotsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingVertical: 2,
+    paddingHorizontal: 4,
+  },
+  dot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: Colors.textTertiary,
   },
 });

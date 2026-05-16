@@ -8,7 +8,7 @@ import { useEffect } from "react";
 import { View, StyleSheet, Platform } from "react-native";
 import { Colors, Shadows } from "@/constants/theme";
 import { CartProvider } from "@/context/CartContext";
-import ChatPopup from "@/components/ChatPopup";
+
 
 export { ErrorBoundary } from "expo-router";
 
@@ -75,21 +75,18 @@ export default function RootLayout() {
   }
 
   const appShell = (
-    <>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="order-confirmation"
-          options={{
-            headerShown: false,
-            presentation: "modal",
-            gestureEnabled: false,
-          }}
-        />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <ChatPopup />
-    </>
+    <Stack>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="order-confirmation"
+        options={{
+          headerShown: false,
+          presentation: "modal",
+          gestureEnabled: false,
+        }}
+      />
+      <Stack.Screen name="+not-found" />
+    </Stack>
   );
 
   return (

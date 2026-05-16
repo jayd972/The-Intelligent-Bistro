@@ -5,6 +5,7 @@ import {
   FlatList,
   TouchableOpacity,
   Alert,
+  Platform,
 } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useRouter } from "expo-router";
@@ -18,10 +19,15 @@ export default function CartScreen() {
   const router = useRouter();
 
   const handleClearCart = () => {
-    Alert.alert("Clear Cart", "Remove all items from your cart?", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Clear", style: "destructive", onPress: clearCart },
-    ]);
+    if (Platform.OS === "web") {
+      const confirmed = window.confirm("Remove all items from your cart?");
+      if (confirmed) clearCart();
+    } else {
+      Alert.alert("Clear Cart", "Remove all items from your cart?", [
+        { text: "Cancel", style: "cancel" },
+        { text: "Clear", style: "destructive", onPress: clearCart },
+      ]);
+    }
   };
 
   const handlePlaceOrder = () => {

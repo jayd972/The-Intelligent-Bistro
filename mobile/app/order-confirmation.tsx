@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -54,7 +54,7 @@ export default function OrderConfirmationScreen() {
     ]).start();
   }, [checkScale, fadeIn, slideUp]);
 
-  const estimatedTime = Math.floor(Math.random() * 11) + 15;
+  const [estimatedTime] = useState(() => Math.floor(Math.random() * 11) + 15);
 
   const statusSteps = [
     { label: "Order placed", icon: "check" as const, active: true },

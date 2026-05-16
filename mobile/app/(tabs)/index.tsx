@@ -8,6 +8,7 @@ import {
   RefreshControl,
   Animated,
   TouchableOpacity,
+  TextInput,
 } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from "@/constants/theme";
@@ -26,6 +27,7 @@ export default function MenuScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [category, setCategory] = useState<MenuCategory | "all">("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [toast, setToast] = useState<string | null>(null);
   const toastOpacity = useRef(new Animated.Value(0)).current;
   const toastTranslate = useRef(new Animated.Value(20)).current;
@@ -89,10 +91,18 @@ export default function MenuScreen() {
     loadMenu(false);
   }, [loadMenu]);
 
+  const searchFiltered = searchQuery.trim()
+    ? items.filter(
+        (item) =>
+          item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.description.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : items;
+
   const filteredItems =
     category === "all"
-      ? items
-      : items.filter((item) => item.category === category);
+      ? searchFiltered
+      : searchFiltered.filter((item) => item.category === category);
 
   const popularItems = items.filter((item) => item.popular);
 
@@ -152,9 +162,20 @@ export default function MenuScreen() {
 
             <View style={styles.searchBar}>
               <FontAwesome name="search" size={14} color={Colors.textTertiary} />
-              <Text style={styles.searchPlaceholder}>
-                Search menu items...
-              </Text>
+              <TextInput
+                style={styles.searchInput}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholder="Search menu items..."
+                placeholderTextColor={Colors.textTertiary}
+                returnKeyType="search"
+                clearButtonMode="while-editing"
+              />
+              {searchQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setSearchQuery("")}>
+                  <FontAwesome name="times-circle" size={16} color={Colors.textTertiary} />
+                </TouchableOpacity>
+              )}
             </View>
 
             <CategoryFilter selected={category} onSelect={setCategory} />
@@ -250,9 +271,11 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm + 4,
     gap: Spacing.sm,
   },
-  searchPlaceholder: {
+  searchInput: {
     ...Typography.body,
-    color: Colors.textTertiary,
+    color: Colors.text,
+    flex: 1,
+    paddingVertical: 0,
   },
   sectionHeader: {
     flexDirection: "row",

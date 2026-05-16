@@ -43,7 +43,7 @@ export default function ChatPopup() {
   const flatListRef = useRef<FlatList>(null);
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const fabScaleAnim = useRef(new Animated.Value(1)).current;
-  const { addItem, removeItem, clearCart, items: cartItems } = useCart();
+  const { addItem, removeItem, updateQuantity, clearCart, items: cartItems } = useCart();
 
   useEffect(() => {
     fetchMenu()
@@ -98,13 +98,20 @@ export default function ChatPopup() {
             if (cartItem) removeItem(cartItem.id);
             break;
           }
+          case "update_quantity": {
+            const cartItem = cartItems.find(
+              (ci) => ci.name.toLowerCase() === action.itemName.toLowerCase()
+            );
+            if (cartItem) updateQuantity(cartItem.id, action.quantity || 1);
+            break;
+          }
           case "clear_cart":
             clearCart();
             break;
         }
       }
     },
-    [menuItems, cartItems, addItem, removeItem, clearCart]
+    [menuItems, cartItems, addItem, removeItem, updateQuantity, clearCart]
   );
 
   const handleSend = useCallback(async () => {
