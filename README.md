@@ -199,36 +199,6 @@ The app gracefully degrades: if OpenAI fails (rate limit, network error), it fal
 - Real payment processing integration
 
 ---
-
-## Loom Demo Script (5 minutes)
-
-### 0:00–0:30 — Hook
-_"This is Intelligent Bistro — a React Native restaurant app where customers can order through the UI or by talking to an AI assistant."_
-
-### 0:30–1:30 — Live Demo
-- Browse the menu, filter by category
-- Add items via the UI buttons, show the toast feedback
-- Switch to Cart tab, show the badge, adjust quantities
-- Switch to AI Assistant, type "Add two burgers and a large lemonade"
-- Show the cart updating automatically
-
-### 1:30–3:00 — Architecture
-- Show the folder structure (backend / mobile split)
-- Walk through the data flow: message → POST /api/assistant → parser → JSON → cart
-- Highlight the fallback parser as a design decision
-- Show CartContext as the single source of truth for both UI and AI
-
-### 3:00–4:00 — Code Highlights
-- Show the AI system prompt and JSON mode constraint
-- Show the cart reducer handling all mutations
-- Show the theme constants for consistent design
-
-### 4:00–5:00 — Wrap Up
-- Mention future work (tests, database, voice input, order history)
-- _"I focused on clean architecture, TypeScript safety, and a polished user experience."_
-
----
-
 ## License
 
 MIT
