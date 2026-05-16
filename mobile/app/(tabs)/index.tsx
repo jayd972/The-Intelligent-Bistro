@@ -11,6 +11,7 @@ import {
   TextInput,
 } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { useRouter } from "expo-router";
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import { MenuItem, MenuCategory } from "@/types";
 import { fetchMenu } from "@/services/api";
@@ -22,6 +23,7 @@ const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", 
 
 export default function MenuScreen() {
   const { addItem } = useCart();
+  const router = useRouter();
   const [items, setItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -157,6 +159,7 @@ export default function MenuScreen() {
                 <Text style={styles.headerTitle}>
                   Intelligent Bistro
                 </Text>
+                <Text style={styles.headerSubtitle}>AI-powered ordering</Text>
               </View>
             </View>
 
@@ -166,7 +169,7 @@ export default function MenuScreen() {
                 style={styles.searchInput}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
-                placeholder="Search menu items..."
+                placeholder="What are you craving?"
                 placeholderTextColor={Colors.textTertiary}
                 returnKeyType="search"
                 clearButtonMode="while-editing"
@@ -178,11 +181,30 @@ export default function MenuScreen() {
               )}
             </View>
 
+            <TouchableOpacity
+              style={styles.aiCard}
+              activeOpacity={0.8}
+              onPress={() => router.push("/assistant")}
+            >
+              <View style={styles.aiCardRow}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.aiCardTitle}>🤖 Order with AI</Text>
+                  <Text style={styles.aiCardSubtitle}>
+                    "Add two spicy chicken sandwiches and a lemonade"
+                  </Text>
+                </View>
+                <View style={styles.aiCardBtn}>
+                  <FontAwesome name="comment" size={11} color={Colors.textLight} />
+                  <Text style={styles.aiCardBtnText}>Ask AI</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+
             <CategoryFilter selected={category} onSelect={setCategory} />
 
             {category === "all" && popularItems.length > 0 && (
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Popular near you</Text>
+                <Text style={styles.sectionTitle}>Chef's Favorites</Text>
               </View>
             )}
             {category !== "all" && (
@@ -276,6 +298,50 @@ const styles = StyleSheet.create({
     color: Colors.text,
     flex: 1,
     paddingVertical: 0,
+  },
+  headerSubtitle: {
+    ...Typography.bodySmall,
+    color: Colors.textTertiary,
+    marginTop: 2,
+  },
+  aiCard: {
+    marginHorizontal: Spacing.md,
+    marginVertical: Spacing.sm,
+    paddingHorizontal: Spacing.sm + 6,
+    paddingVertical: Spacing.sm + 4,
+    backgroundColor: Colors.primarySoft,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: "rgba(255, 48, 8, 0.1)",
+  },
+  aiCardRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm + 2,
+  },
+  aiCardTitle: {
+    ...Typography.h3,
+    color: Colors.text,
+    marginBottom: 1,
+  },
+  aiCardSubtitle: {
+    ...Typography.caption,
+    color: Colors.textTertiary,
+    fontStyle: "italic",
+  },
+  aiCardBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.xs,
+    backgroundColor: Colors.primary,
+    paddingHorizontal: Spacing.sm + 4,
+    paddingVertical: Spacing.xs + 3,
+    borderRadius: BorderRadius.full,
+  },
+  aiCardBtnText: {
+    fontSize: 11,
+    color: Colors.textLight,
+    fontWeight: "600",
   },
   sectionHeader: {
     flexDirection: "row",

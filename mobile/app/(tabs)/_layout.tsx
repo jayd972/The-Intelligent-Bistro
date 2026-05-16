@@ -33,18 +33,19 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.textTertiary,
+        tabBarShowLabel: true,
         tabBarStyle: {
           backgroundColor: Colors.surface,
           borderTopWidth: 1,
           borderTopColor: Colors.borderLight,
-          height: Platform.OS === "ios" ? 84 : 60,
-          paddingBottom: Platform.OS === "ios" ? 24 : 8,
-          paddingTop: 8,
+          height: Platform.OS === "ios" ? 88 : 72,
+          paddingBottom: Platform.OS === "ios" ? 24 : 10,
+          paddingTop: 6,
         },
         tabBarLabelStyle: {
           fontSize: 11,
-          fontWeight: "500",
-          marginTop: 2,
+          fontWeight: "600",
+          marginTop: 4,
         },
         headerStyle: {
           backgroundColor: Colors.surface,
@@ -83,7 +84,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="assistant"
         options={{
-          title: "Assistant",
+          title: "Ask Bistro",
           headerShown: false,
           tabBarIcon: ({ color }) => (
             <TabBarIcon name="comment" color={color} />

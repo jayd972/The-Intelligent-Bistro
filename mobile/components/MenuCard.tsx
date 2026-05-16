@@ -7,6 +7,7 @@ import {
   Spacing,
   BorderRadius,
   Typography,
+  Shadows,
 } from "@/constants/theme";
 import { menuImages } from "@/constants/images";
 
@@ -50,28 +51,20 @@ export default function MenuCard({ item, onAddToCart }: MenuCardProps) {
         activeOpacity={0.7}
       >
         <View style={styles.textSection}>
-          <View style={styles.nameRow}>
-            <Text style={styles.name} numberOfLines={1}>
-              {item.name}
-            </Text>
-            {item.popular && (
-              <View style={styles.popularBadge}>
-                <FontAwesome name="star" size={8} color="#B8860B" />
-              </View>
-            )}
-          </View>
+          <Text style={styles.name} numberOfLines={1}>
+            {item.name}
+          </Text>
 
-          <Text style={styles.description} numberOfLines={2}>
+          <Text style={styles.description} numberOfLines={3}>
             {item.description}
           </Text>
 
           <View style={styles.metaRow}>
             <Text style={styles.price}>${item.price.toFixed(2)}</Text>
             {item.availableModifiers && item.availableModifiers.length > 0 && (
-              <>
-                <View style={styles.metaDot} />
-                <Text style={styles.metaText}>Customizable</Text>
-              </>
+              <View style={styles.customBadge}>
+                <Text style={styles.customBadgeText}>Customizable</Text>
+              </View>
             )}
           </View>
         </View>
@@ -103,38 +96,27 @@ export default function MenuCard({ item, onAddToCart }: MenuCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
+    marginHorizontal: Spacing.sm + 4,
+    marginBottom: Spacing.sm + 4,
+    borderRadius: BorderRadius.lg,
     backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    ...Shadows.small,
   },
   cardInner: {
     flexDirection: "row",
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
-    gap: Spacing.md,
+    padding: Spacing.sm + 6,
+    gap: Spacing.sm + 4,
   },
   textSection: {
     flex: 1,
     justifyContent: "center",
   },
-  nameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.xs + 2,
-    marginBottom: 3,
-  },
   name: {
     ...Typography.h3,
     color: Colors.text,
-    flex: 1,
-  },
-  popularBadge: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: Colors.accentSoft,
-    alignItems: "center",
-    justifyContent: "center",
+    marginBottom: 3,
   },
   description: {
     ...Typography.bodySmall,
@@ -145,20 +127,21 @@ const styles = StyleSheet.create({
   metaRow: {
     flexDirection: "row",
     alignItems: "center",
+    gap: Spacing.sm,
   },
   price: {
     ...Typography.price,
     color: Colors.text,
   },
-  metaDot: {
-    width: 3,
-    height: 3,
-    borderRadius: 1.5,
-    backgroundColor: Colors.textTertiary,
-    marginHorizontal: Spacing.sm,
+  customBadge: {
+    backgroundColor: Colors.surfaceAlt,
+    borderRadius: BorderRadius.full,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
   },
-  metaText: {
-    ...Typography.caption,
+  customBadgeText: {
+    fontSize: 10,
+    fontWeight: "600" as const,
     color: Colors.textSecondary,
   },
   imageSection: {
@@ -167,29 +150,29 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   imageWrap: {
-    width: 96,
-    height: 96,
-    borderRadius: BorderRadius.md,
+    width: 88,
+    height: 88,
+    borderRadius: BorderRadius.md + 2,
     backgroundColor: Colors.surfaceAlt,
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
   },
   foodImage: {
-    width: 96,
-    height: 96,
-    borderRadius: BorderRadius.md,
+    width: 88,
+    height: 88,
+    borderRadius: BorderRadius.md + 2,
   },
   fallbackEmoji: {
-    fontSize: 44,
+    fontSize: 40,
   },
   addBtn: {
     position: "absolute",
     bottom: -6,
     right: -6,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: Colors.primary,
     alignItems: "center",
     justifyContent: "center",
