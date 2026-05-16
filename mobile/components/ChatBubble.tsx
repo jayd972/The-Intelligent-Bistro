@@ -9,6 +9,17 @@ interface ChatBubbleProps {
 
 export default function ChatBubble({ message }: ChatBubbleProps) {
   const isUser = message.role === "user";
+  const isSystem = message.role === "system";
+
+  if (isSystem) {
+    return (
+      <View style={styles.systemRow}>
+        <View style={styles.systemCard}>
+          <Text style={styles.systemText}>{message.content}</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.row, isUser && styles.rowUser]}>
@@ -160,5 +171,23 @@ const styles = StyleSheet.create({
     height: 7,
     borderRadius: 3.5,
     backgroundColor: Colors.textTertiary,
+  },
+  systemRow: {
+    alignItems: "center",
+    marginBottom: Spacing.xs + 2,
+    paddingHorizontal: Spacing.md,
+  },
+  systemCard: {
+    backgroundColor: Colors.successSoft,
+    borderRadius: BorderRadius.sm,
+    paddingHorizontal: Spacing.sm + 4,
+    paddingVertical: Spacing.xs + 2,
+    borderWidth: 1,
+    borderColor: "rgba(0, 131, 62, 0.15)",
+  },
+  systemText: {
+    ...Typography.caption,
+    color: Colors.success,
+    fontWeight: "600",
   },
 });

@@ -55,7 +55,7 @@ export interface AssistantResponse {
 
 export interface ChatMessage {
   id: string;
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "system";
   content: string;
   timestamp: number;
 }

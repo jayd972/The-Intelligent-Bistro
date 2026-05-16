@@ -25,7 +25,7 @@ const WELCOME_MESSAGE: ChatMessage = {
   id: "welcome",
   role: "assistant",
   content:
-    'Hi! I\'m your AI ordering assistant at Intelligent Bistro. Try saying:\n\n"Add two burgers and a lemonade"\n"Remove the pasta"\n"What drinks do you have?"\n"Clear my cart"',
+    'Hi! I\'m Bistro, your smart ordering assistant. Try saying:\n\n"Add two burgers and a lemonade"\n"Remove the pasta"\n"What drinks do you have?"\n"Clear my cart"',
   timestamp: Date.now(),
 };
 
@@ -105,17 +105,44 @@ export default function AssistantScreen() {
 
       if (response.intent === "cart_update" && response.actions.length > 0) {
         applyActions(response.actions);
-      }
 
-      const cartBadge =
-        response.intent === "cart_update" && response.actions.length > 0
-          ? " 🛒"
-          : "";
+        // Add visual cart update cards
+        const actionCards: ChatMessage[] = response.actions.map((action, i) => {
+          let icon = "";
+          let label = "";
+          switch (action.type) {
+            case "add_item":
+              icon = "✅";
+              label = `Added ${action.quantity || 1}× ${action.itemName}${action.size ? ` (${action.size})` : ""}`;
+              break;
+            case "remove_item":
+              icon = "🗑️";
+              label = `Removed ${action.itemName}`;
+              break;
+            case "update_quantity":
+              icon = "✏️";
+              label = `Updated ${action.itemName} → ${action.quantity}`;
+              break;
+            case "clear_cart":
+              icon = "🧹";
+              label = "Cart cleared";
+              break;
+          }
+          return {
+            id: `action-${Date.now()}-${i}`,
+            role: "system" as const,
+            content: `${icon} ${label}`,
+            timestamp: Date.now(),
+          };
+        });
+
+        setMessages((prev) => [...prev, ...actionCards]);
+      }
 
       const assistantMessage: ChatMessage = {
         id: `assistant-${Date.now()}`,
         role: "assistant",
-        content: response.assistantMessage + cartBadge,
+        content: response.assistantMessage,
         timestamp: Date.now(),
       };
 
@@ -156,7 +183,7 @@ export default function AssistantScreen() {
           <Text style={styles.headerAvatarText}>🤖</Text>
         </View>
         <View style={styles.headerInfo}>
-          <Text style={styles.headerTitle}>AI Assistant</Text>
+          <Text style={styles.headerTitle}>Ask Bistro</Text>
           <Text style={styles.headerSubtitle}>
             {isTyping ? "Typing..." : "Online • Ready to help"}
           </Text>

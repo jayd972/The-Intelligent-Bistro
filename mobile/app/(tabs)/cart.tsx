@@ -76,17 +76,23 @@ export default function CartScreen() {
             onRemove={removeItem}
           />
         )}
-        ListHeaderComponent={
-          <View style={styles.listHeader}>
-            <Text style={styles.itemCount}>
-              {totalQty} item{totalQty !== 1 ? "s" : ""}
-            </Text>
-            <TouchableOpacity
-              onPress={handleClearCart}
-              activeOpacity={0.6}
-            >
-              <Text style={styles.clearText}>Clear all</Text>
-            </TouchableOpacity>
+      ListHeaderComponent={
+          <View>
+            <View style={styles.headerBar}>
+              <Text style={styles.headerTitle}>Your Cart</Text>
+              <Text style={styles.headerSubtitle}>Review and place your order</Text>
+            </View>
+            <View style={styles.listHeader}>
+              <Text style={styles.itemCount}>
+                {totalQty} item{totalQty !== 1 ? "s" : ""}
+              </Text>
+              <TouchableOpacity
+                onPress={handleClearCart}
+                activeOpacity={0.6}
+              >
+                <Text style={styles.clearText}>Clear all</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         }
         contentContainerStyle={styles.listContent}
@@ -128,14 +134,26 @@ const styles = StyleSheet.create({
   listContent: {
     paddingBottom: Spacing.md,
   },
+  headerBar: {
+    paddingHorizontal: Spacing.md,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.sm,
+  },
+  headerTitle: {
+    ...Typography.h1,
+    color: Colors.text,
+  },
+  headerSubtitle: {
+    ...Typography.bodySmall,
+    color: Colors.textTertiary,
+    marginTop: 2,
+  },
   listHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
+    paddingVertical: Spacing.sm + 4,
   },
   itemCount: {
     ...Typography.body,
@@ -190,7 +208,7 @@ const styles = StyleSheet.create({
   },
   orderButton: {
     backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.sm,
+    borderRadius: BorderRadius.lg,
     paddingVertical: Spacing.sm + 6,
     alignItems: "center",
     justifyContent: "center",
