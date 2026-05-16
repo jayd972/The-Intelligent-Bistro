@@ -95,10 +95,10 @@ export default function MenuScreen() {
 
   const searchFiltered = searchQuery.trim()
     ? items.filter(
-        (item) =>
-          item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.description.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      (item) =>
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.description.toLowerCase().includes(searchQuery.toLowerCase())
+    )
     : items;
 
   const filteredItems =
@@ -190,10 +190,10 @@ export default function MenuScreen() {
                 <View style={{ flex: 1 }}>
                   <Text style={styles.aiCardTitle}>🤖 Ask Bistro</Text>
                   <Text style={styles.aiCardDesc}>
-                    Tell me what you want and I'll build your cart.
+                    Tell me what you are craving today.
                   </Text>
                   <Text style={styles.aiCardSubtitle}>
-                    "Add two spicy chicken sandwiches and a lemonade"
+                    "Add fries and a lemonade"
                   </Text>
                 </View>
                 <View style={styles.aiCardBtn}>
