@@ -5,7 +5,6 @@ import { CartItem } from "@/types";
 import {
   Colors,
   Spacing,
-  BorderRadius,
   Typography,
 } from "@/constants/theme";
 import QuantityStepper from "./QuantityStepper";

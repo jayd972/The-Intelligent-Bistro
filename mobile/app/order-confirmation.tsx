@@ -14,7 +14,6 @@ import {
   Typography,
   Spacing,
   BorderRadius,
-  Shadows,
 } from "@/constants/theme";
 
 export default function OrderConfirmationScreen() {

@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useRouter } from "expo-router";
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from "@/constants/theme";
+import { Colors, Typography, Spacing, BorderRadius } from "@/constants/theme";
 import { useCart } from "@/context/CartContext";
 import CartItemCard from "@/components/CartItemCard";
 
